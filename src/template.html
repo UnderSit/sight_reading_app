@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Prima Vista: esercizi di lettura musicale a prima vista generati nel browser.">
+<title>Prima Vista · Lettura a prima vista</title>
+<style>
+/*__STYLES__*/
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="app-header">
+    <a class="brand" href="#" id="brand-home" aria-label="Prima Vista, nuovo esercizio">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 17V5l9-2v12"></path>
+          <ellipse cx="6" cy="17.5" rx="2.6" ry="2"></ellipse>
+          <ellipse cx="15" cy="15.5" rx="2.6" ry="2"></ellipse>
+        </svg>
+      </span>
+      <span>
+        <span class="brand-title">Prima Vista</span>
+        <span class="brand-sub">Lettura musicale</span>
+      </span>
+    </a>
+    <div class="header-level">
+      <span class="header-level-label">Livello</span>
+      <select class="level-select" id="level-select" aria-label="Scegli il livello"></select>
+      <span class="level-name" id="level-name">Primo passo</span>
+    </div>
+    <div class="header-stats" aria-label="Statistiche principali">
+      <div class="header-stat"><strong id="header-streak">0</strong><span>Serie</span></div>
+      <div class="header-stat"><strong id="header-total">0</strong><span>Esercizi</span></div>
+      <div class="header-stat"><strong id="header-accuracy">—</strong><span>Precisione</span></div>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-icon btn-subtle" id="theme-toggle" aria-label="Attiva tema scuro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+        </svg>
+      </button>
+      <button type="button" class="btn" id="settings-open">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"></path>
+        </svg>
+        <span class="btn-label">Impostazioni</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section class="workspace" aria-label="Area di lettura">
+      <article class="card exercise-card">
+        <div class="exercise-head">
+          <div>
+            <p class="eyebrow" id="exercise-eyebrow">Esercizio</p>
+            <h1 class="exercise-title" id="exercise-title">Preparazione dello spartito…</h1>
+            <p class="exercise-sub" id="exercise-sub">Sto scegliendo tonalità, ritmo e note.</p>
+          </div>
+          <div class="meta-badges" id="meta-badges"></div>
+        </div>
+
+        <div class="mode-row">
+          <div class="mode-switch" role="group" aria-label="Modalità di lettura">
+            <button type="button" data-mode="read" aria-pressed="true">Lettura</button>
+            <button type="button" data-mode="quiz" aria-pressed="false">Quiz note</button>
+          </div>
+          <p class="mode-hint" id="mode-hint">Leggi lo spartito, ascoltalo e suona sul pianoforte.</p>
+        </div>
+
+        <div class="score-toolbar">
+          <div class="toolbar-group">
+            <button type="button" class="btn btn-primary" id="play-button" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"></path></svg>
+              <span class="btn-label" id="play-label">Ascolta</span>
+            </button>
+            <button type="button" class="btn" id="restart-button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+              <span class="btn-label">Da capo</span>
+            </button>
+            <button type="button" class="btn" id="names-button" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 12h10M4 19h7"></path></svg>
+              <span class="btn-label">Nomi note</span>
+            </button>
+            <button type="button" class="btn" id="analysis-button" aria-expanded="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z"></path><path d="M8 9h8M8 13h5"></path></svg>
+              <span class="btn-label">Analisi</span>
+            </button>
+          </div>
+          <div class="toolbar-group">
+            <button type="button" class="btn" id="complete-button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>
+              <span class="btn-label">Segna completato</span>
+            </button>
+            <button type="button" class="btn btn-primary" id="new-button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              <span class="btn-label">Nuovo esercizio</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="score-container" id="score-container">
+          <svg id="score-svg" xmlns="http://www.w3.org/2000/svg" role="img"></svg>
+          <div class="score-placeholder" id="score-placeholder">Generazione dello spartito…</div>
+          <div class="score-error" id="score-error" hidden>
+            <p id="score-error-text"></p>
+            <button type="button" class="btn" id="score-error-retry">Riprova</button>
+          </div>
+        </div>
+
+        <div class="quiz-panel" id="quiz-panel" hidden>
+          <div class="quiz-copy">
+            <p class="quiz-title" id="quiz-title">Quiz delle note</p>
+            <p class="quiz-prompt" id="quiz-prompt">Suona la nota cerchiata sul pianoforte.</p>
+            <p class="quiz-feedback" id="quiz-feedback"></p>
+          </div>
+          <div class="quiz-actions">
+            <span class="quiz-progress" id="quiz-progress"></span>
+            <button type="button" class="btn btn-small" id="quiz-skip">Salta</button>
+            <button type="button" class="btn btn-small" id="quiz-exit">Esci</button>
+          </div>
+        </div>
+
+        <div class="completion-note" id="completion-note" hidden>
+          <span id="completion-text">Esercizio completato.</span>
+          <button type="button" class="btn btn-small" id="completion-new">Nuovo esercizio</button>
+        </div>
+
+        <section class="answer-panel" id="answer-panel" hidden aria-label="Analisi dell'esercizio">
+          <div class="answer-head">
+            <h3>Analisi dell'esercizio</h3>
+            <button type="button" class="btn btn-small btn-subtle" id="answer-close">Chiudi</button>
+          </div>
+          <div class="answer-content" id="answer-content"></div>
+        </section>
+      </article>
+
+      <section class="card keyboard-card" aria-labelledby="keyboard-title">
+        <div class="keyboard-head">
+          <div>
+            <h2 id="keyboard-title">Pianoforte</h2>
+            <span class="keyboard-range" id="keyboard-range"></span>
+          </div>
+          <div class="keyboard-actions">
+            <label class="checkbox-inline"><input type="checkbox" id="keyboard-labels" checked> Nomi tasti</label>
+            <button type="button" class="btn btn-small" id="midi-button">Collega MIDI</button>
+            <span class="keyboard-status" id="keyboard-status">Tastiera</span>
+          </div>
+        </div>
+        <p class="keyboard-hint" id="keyboard-hint">Clicca o tocca i tasti per suonare. Puoi collegare una tastiera MIDI per il quiz.</p>
+        <div class="keyboard-scroll">
+          <div class="keyboard" id="keyboard" aria-label="Tastiera del pianoforte"></div>
+        </div>
+      </section>
+    </section>
+
+    <aside class="rail" aria-label="Livello e statistiche">
+      <section class="card rail-card">
+        <h2 id="level-card-title">Primo passo</h2>
+        <p class="rail-sub" id="level-card-sub">Fondamenta</p>
+        <p class="level-description" id="level-description"></p>
+        <div class="level-focus" id="level-focus"></div>
+        <div class="rail-divider"></div>
+        <div class="stat-list">
+          <div class="stat-row"><span>Misure</span><strong id="session-measures">—</strong></div>
+          <div class="stat-row"><span>Note</span><strong id="session-notes">—</strong></div>
+          <div class="stat-row"><span>Tempo</span><strong id="session-tempo">—</strong></div>
+          <div class="stat-row"><span>Durata</span><strong id="session-duration">—</strong></div>
+        </div>
+      </section>
+
+      <section class="card rail-card">
+        <h2>Il tuo percorso</h2>
+        <p class="rail-sub">Salvato solo in questo browser</p>
+        <div class="stat-list">
+          <div class="stat-row"><span>Esercizi generati</span><strong id="stat-total">0</strong></div>
+          <div class="stat-row"><span>Completati</span><strong class="accent" id="stat-completed">0</strong></div>
+          <div class="stat-row"><span>Precisione quiz</span><strong id="stat-accuracy">—</strong></div>
+          <div class="stat-row"><span>Serie attuale</span><strong id="stat-streak">0</strong></div>
+        </div>
+        <div class="rail-divider"></div>
+        <h2>Recenti</h2>
+        <ul class="recent-list" id="recent-list"></ul>
+        <p class="recent-empty" id="recent-empty">Completa un esercizio per iniziare a costruire il tuo percorso.</p>
+      </section>
+
+      <section class="card rail-card">
+        <h2>Come funziona</h2>
+        <ul class="help-list">
+          <li>Ogni esercizio è generato con regole musicali, non con frammenti casuali.</li>
+          <li>Leggi ritmo e altezze, poi ascolta per verificare.</li>
+          <li>Il quiz chiede di suonare una nota alla volta.</li>
+        </ul>
+        <p class="keyboard-shortcut"><kbd>Spazio</kbd> ascolta · <kbd>N</kbd> nuovo · <kbd>R</kbd> da capo</p>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="app-footer">
+    <span>Prima Vista · generato interamente nel browser</span>
+    <div class="footer-links">
+      <span id="storage-note"></span>
+      <button type="button" id="print-button">Stampa</button>
+      <button type="button" id="test-open">Test</button>
+      <button type="button" id="about-open">Informazioni</button>
+      <button type="button" id="reset-stats">Azzera statistiche</button>
+    </div>
+  </footer>
+</div>
+
+<dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+  <form id="settings-form" novalidate>
+    <div class="dialog-head">
+      <div>
+        <h2 id="settings-title">Impostazioni</h2>
+        <p>Modella l’esercizio del livello selezionato.</p>
+      </div>
+      <button type="button" class="dialog-close" id="settings-close" aria-label="Chiudi impostazioni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+      </button>
+    </div>
+    <div class="settings-body">
+      <section class="settings-section">
+        <h3>Generazione</h3>
+        <div class="settings-grid">
+          <div class="field">
+            <label for="settings-seed">Seme fisso</label>
+            <div class="range-pair">
+              <input type="text" id="settings-seed" inputmode="numeric" placeholder="Casuale" autocomplete="off">
+              <button type="button" class="btn btn-small" id="settings-seed-clear">Casuale</button>
+            </div>
+            <span class="hint">Un numero rende l’esercizio riproducibile. Lascia vuoto per un seme nuovo.</span>
+          </div>
+          <div class="field">
+            <label for="settings-accidentals">Alterazioni massime</label>
+            <div class="range-pair">
+              <input type="range" id="settings-accidentals" min="0" max="7" step="1" value="0">
+              <span class="range-value" id="settings-accidentals-value">0</span>
+            </div>
+            <span class="hint">Numero di diesis o bemolli nella tonalità.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Pentagramma</h3>
+        <div class="settings-grid">
+          <div class="field field--full">
+            <span class="field-label">Tipo di pentagramma</span>
+            <div class="segmented">
+              <label><input type="radio" name="settings-staff" value="treble"><span>Mano destra</span></label>
+              <label><input type="radio" name="settings-staff" value="grand"><span>Grande pentagramma</span></label>
+              <label><input type="radio" name="settings-staff" value="bass"><span>Mano sinistra</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label">Estensione mano destra</span>
+            <div class="range-pair">
+              <select id="settings-rh-low" aria-label="Nota grave mano destra"></select>
+              <select id="settings-rh-high" aria-label="Nota acuta mano destra"></select>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label">Estensione mano sinistra</span>
+            <div class="range-pair">
+              <select id="settings-lh-low" aria-label="Nota grave mano sinistra"></select>
+              <select id="settings-lh-high" aria-label="Nota acuta mano sinistra"></select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="settings-max-ledger">Righe aggiuntive massime</label>
+            <div class="range-pair">
+              <input type="range" id="settings-max-ledger" min="0" max="4" step="1" value="1">
+              <span class="range-value" id="settings-max-ledger-value">1</span>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label">Voci nella mano destra</span>
+            <div class="segmented">
+              <label><input type="radio" name="settings-voices" value="1"><span>Una voce</span></label>
+              <label><input type="radio" name="settings-voices" value="2"><span>Due voci</span></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Ritmo</h3>
+        <div class="settings-grid">
+          <div class="field field--full">
+            <span class="field-label field-label-row">Metri <button type="button" class="link-btn" data-select-all="settings-meters">Tutti</button></span>
+            <div class="chip-grid" id="settings-meters"></div>
+          </div>
+          <div class="field field--full">
+            <span class="field-label field-label-row">Valori ritmici <button type="button" class="link-btn" data-select-all="settings-durations">Tutti</button></span>
+            <div class="chip-grid" id="settings-durations"></div>
+          </div>
+          <div class="field field--full">
+            <span class="field-label">Articolazione</span>
+            <div class="chip-grid">
+              <label class="chip"><input type="checkbox" id="settings-dots"> Punti</label>
+              <label class="chip"><input type="checkbox" id="settings-ties"> Legature</label>
+              <label class="chip"><input type="checkbox" id="settings-syncopation"> Sincopi</label>
+              <label class="chip"><input type="checkbox" id="settings-tuplets"> Terzine</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="settings-rest">Quantità di pause</label>
+            <div class="range-pair">
+              <input type="range" id="settings-rest" min="0" max="35" step="1" value="6">
+              <span class="range-value" id="settings-rest-value">6%</span>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label">Misure</span>
+            <div class="segmented">
+              <label><input type="radio" name="settings-measures" value="2"><span>2</span></label>
+              <label><input type="radio" name="settings-measures" value="4"><span>4</span></label>
+              <label><input type="radio" name="settings-measures" value="6"><span>6</span></label>
+              <label><input type="radio" name="settings-measures" value="8"><span>8</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="settings-tempo-min">Tempo minimo</label>
+            <input type="number" id="settings-tempo-min" min="30" max="180" step="2" value="60">
+          </div>
+          <div class="field">
+            <label for="settings-tempo-max">Tempo massimo</label>
+            <input type="number" id="settings-tempo-max" min="30" max="180" step="2" value="76">
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Armonia e profilo</h3>
+        <div class="settings-grid">
+          <div class="field">
+            <span class="field-label">Tonalità</span>
+            <div class="segmented">
+              <label><input type="radio" name="settings-key-mode" value="random"><span>Casuale</span></label>
+              <label><input type="radio" name="settings-key-mode" value="fixed"><span>Fissa</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="settings-fixed-key">Tonalità fissa</label>
+            <select id="settings-fixed-key"></select>
+          </div>
+          <div class="field field--full">
+            <span class="field-label">Colore armonico</span>
+            <div class="chip-grid">
+              <label class="chip"><input type="checkbox" id="settings-minor"> Tonalità minori</label>
+              <label class="chip"><input type="checkbox" id="settings-chromatic"> Alterazioni cromatiche</label>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label">Accordi</span>
+            <div class="segmented">
+              <label><input type="radio" name="settings-chords" value="none"><span>Nessuno</span></label>
+              <label><input type="radio" name="settings-chords" value="block"><span>In blocco</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="settings-chord-hand">Mano degli accordi</label>
+            <select id="settings-chord-hand">
+              <option value="right">Mano destra</option>
+              <option value="left">Mano sinistra</option>
+              <option value="both">Entrambe</option>
+            </select>
+          </div>
+          <div class="field">
+            <span class="field-label">Ampiezza dei salti</span>
+            <div class="segmented">
+              <label><input type="radio" name="settings-leap" value="small"><span>Piccoli</span></label>
+              <label><input type="radio" name="settings-leap" value="medium"><span>Medi</span></label>
+              <label><input type="radio" name="settings-leap" value="wide"><span>Ampi</span></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Composizione</h3>
+        <div class="settings-grid">
+          <div class="field">
+            <label for="settings-style">Stile</label>
+            <select id="settings-style">
+              <option value="classical">Classica</option>
+              <option value="hymn">Inno</option>
+              <option value="folk">Folk</option>
+              <option value="baroque">Barocca</option>
+              <option value="romantic">Romantica</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="settings-minor-flavor">Colore minore</label>
+            <select id="settings-minor-flavor">
+              <option value="natural">Naturale</option>
+              <option value="harmonic">Armonica</option>
+              <option value="melodic">Melodica</option>
+              <option value="mixed">Mista</option>
+            </select>
+          </div>
+          <div class="field field--full">
+            <span class="field-label">Complessità armonica</span>
+            <div class="segmented">
+              <label><input type="radio" name="settings-complexity" value="monophonic"><span>Monofonica</span></label>
+              <label><input type="radio" name="settings-complexity" value="triads"><span>Triadi</span></label>
+              <label><input type="radio" name="settings-complexity" value="sevenths"><span>Settime</span></label>
+              <label><input type="radio" name="settings-complexity" value="advanced"><span>Avanzata</span></label>
+            </div>
+          </div>
+          <div class="field field--full">
+            <span class="field-label">Cadenza finale</span>
+            <div class="segmented">
+              <label><input type="radio" name="settings-cadence" value="tonal"><span>Tonale</span></label>
+              <label><input type="radio" name="settings-cadence" value="open"><span>Sospesa</span></label>
+              <label><input type="radio" name="settings-cadence" value="none"><span>Nessuna</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label">Lunghezza della frase</span>
+            <div class="segmented">
+              <label><input type="radio" name="settings-phrase-length" value="2"><span>2 misure</span></label>
+              <label><input type="radio" name="settings-phrase-length" value="4"><span>4 misure</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="settings-phrase-repetition">Ripetizione dei motivi</label>
+            <div class="range-pair">
+              <input type="range" id="settings-phrase-repetition" min="0" max="100" step="5" value="55">
+              <span class="range-value" id="settings-phrase-repetition-value">55%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="settings-footer">
+      <button type="button" class="btn btn-small" id="settings-reset">Ripristina livello</button>
+      <span class="grow"></span>
+      <span class="form-error" id="settings-error" role="alert"></span>
+      <button type="button" class="btn" id="settings-cancel">Annulla</button>
+      <button type="submit" class="btn btn-primary">Applica</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="about-dialog" id="about-dialog" aria-labelledby="about-title">
+  <div class="dialog-head">
+    <div>
+      <h2 id="about-title">Prima Vista</h2>
+      <p>Un allenamento di lettura musicale generato nel tuo browser.</p>
+    </div>
+    <button type="button" class="dialog-close" id="about-close" aria-label="Chiudi informazioni">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+    </button>
+  </div>
+  <div class="about-body">
+    <h3>Come leggere</h3>
+    <p>Ogni esercizio nasce da regole di armonia e ritmo: tonalità, metro, valori, pause, legature e accordi sono coerenti. Puoi cambiare livello, personalizzare le impostazioni e seguire i tuoi progressi.</p>
+    <h3>Ascolto e quiz</h3>
+    <p>L’ascolto è una sintesi pianistica generata con la Web Audio API. Il quiz verifica le note suonate con il pianoforte sullo schermo o con una tastiera MIDI; non valuta l’acustica di un pianoforte reale.</p>
+    <h3>Notazione</h3>
+    <p>I glifi musicali sono tracciati dal font Bravura di Steinberg, distribuito con SIL Open Font License 1.1. Il programma non usa immagini, font o librerie esterne.</p>
+    <p class="fineprint">Prima Vista · versione 1.0 · dati di pratica salvati solo nel browser.</p>
+  </div>
+</dialog>
+
+<dialog class="test-dialog" id="test-dialog" aria-labelledby="test-title">
+  <div class="dialog-head">
+    <div>
+      <h2 id="test-title">Test interni</h2>
+      <p>Verifica teoria, ritmo, generazione, notazione e timeline audio.</p>
+    </div>
+    <button type="button" class="dialog-close" id="test-close" aria-label="Chiudi test">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+    </button>
+  </div>
+  <div class="test-body">
+    <div class="test-summary" id="test-summary"></div>
+    <div id="test-results"></div>
+  </div>
+  <div class="dialog-actions">
+    <button type="button" class="btn" id="test-run">Esegui di nuovo</button>
+    <button type="button" class="btn btn-primary" id="test-done">Chiudi</button>
+  </div>
+</dialog>
+
+<dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-title">
+  <div class="dialog-head">
+    <div>
+      <h2 id="confirm-title">Azzera statistiche</h2>
+      <p>Questa azione non si può annullare.</p>
+    </div>
+  </div>
+  <div class="dialog-body">
+    <p id="confirm-text">Vuoi eliminare esercizi completati, serie e precisione del quiz? Le impostazioni resteranno invariate.</p>
+  </div>
+  <div class="dialog-actions">
+    <button type="button" class="btn" id="confirm-cancel">Annulla</button>
+    <button type="button" class="btn btn-danger" id="confirm-ok">Azzera</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<noscript>Prima Vista richiede JavaScript per generare e mostrare gli esercizi.</noscript>
+
+<script>
+/*__SCRIPTS__*/
+</script>
+</body>
+</html>
